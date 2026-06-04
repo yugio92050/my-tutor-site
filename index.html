@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>大学生家教平台</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 body{
@@ -44,6 +45,22 @@ section{
     text-decoration:none;
     border-radius:5px;
     margin-top:10px;
+    border:none;
+    cursor:pointer;
+    font-size:14px;
+}
+
+input, textarea{
+    width: 100%;
+    padding: 8px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.form-group{
+    margin-bottom: 15px;
 }
 </style>
 </head>
@@ -55,45 +72,36 @@ section{
     <p>家长发布需求 · 大学生发布家教信息 · 双方直接联系</p>
 </header>
 
+<!-- 发布家教信息表单 -->
 <section>
-    <h2>功能入口</h2>
-
-    <p>
-        <a class="btn" href="parents.html">我要找家教</a>
-        <a class="btn" href="teachers.html">我要做家教</a>
-    </p>
+    <h2>✨ 发布你的家教信息</h2>
+    <div class="form-group">
+        <input type="text" id="name" placeholder="你的姓名">
+    </div>
+    <div class="form-group">
+        <input type="text" id="subject" placeholder="辅导科目（如：数学、英语）">
+    </div>
+    <div class="form-group">
+        <input type="text" id="contact" placeholder="联系方式（微信/电话）">
+    </div>
+    <button class="btn" onclick="publishPost()">立即发布</button>
 </section>
 
 <section>
-    <h2>家教老师信息</h2>
-
-    <div class="card">
-        <h3>张同学</h3>
-        <p>学校：中国传媒大学</p>
-        <p>科目：语文、英语</p>
-        <p>授课方式：线上 / 线下</p>
-        <p>联系方式：微信xxxxxx</p>
-    </div>
-
-    <div class="card">
-        <h3>李同学</h3>
-        <p>学校：北京师范大学</p>
-        <p>科目：数学</p>
-        <p>授课方式：线上</p>
-        <p>联系方式：微信xxxxxx</p>
+    <h2>📚 家教老师信息（实时更新）</h2>
+    <div id="teachersList">
+        <p>加载中...</p>
     </div>
 </section>
 
 <section>
-    <h2>家长需求信息</h2>
-
+    <h2>👪 家长需求信息</h2>
     <div class="card">
         <h3>初二数学辅导</h3>
         <p>地区：北京市朝阳区</p>
         <p>预算：150元/小时</p>
         <p>联系方式：微信xxxxxx</p>
     </div>
-
     <div class="card">
         <h3>小学英语辅导</h3>
         <p>地区：线上</p>
@@ -104,12 +112,90 @@ section{
 
 <section>
     <h2>平台说明</h2>
-
-    <p>
-        本平台为大学生与家长提供信息发布服务，
-        请自行核实身份信息并沟通授课安排。
-    </p>
+    <p>本平台为大学生与家长提供信息发布服务，请自行核实身份信息并沟通授课安排。</p>
 </section>
+
+<script>
+    // 你的 Supabase 配置（已填写正确）
+    const SUPABASE_URL = 'https://kcrmenyvswngb9gnu.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_kcRMEnY_vsWngb9GNU-GiQ_oMcq-jeB';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 发布新帖子
+    async function publishPost() {
+        const name = document.getElementById('name').value.trim();
+        const subject = document.getElementById('subject').value.trim();
+        const contact = document.getElementById('contact').value.trim();
+
+        if (!name || !subject || !contact) {
+            alert('请填写姓名、科目和联系方式');
+            return;
+        }
+
+        const { error } = await supabase
+            .from('posts')
+            .insert([{ name, subject, contact }]);
+
+        if (error) {
+            console.error('发布失败:', error);
+            alert('发布失败，请按F12查看控制台错误');
+        } else {
+            alert('发布成功！');
+            document.getElementById('name').value = '';
+            document.getElementById('subject').value = '';
+            document.getElementById('contact').value = '';
+            loadTeachers();  // 刷新列表
+        }
+    }
+
+    // 加载所有家教信息
+    async function loadTeachers() {
+        const { data, error } = await supabase
+            .from('posts')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        const container = document.getElementById('teachersList');
+
+        if (error) {
+            console.error('加载失败:', error);
+            container.innerHTML = '<p>⚠️ 加载失败，请刷新页面重试</p>';
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p>暂无家教信息，快来发布第一条吧 ✨</p>';
+            return;
+        }
+
+        let html = '';
+        for (let item of data) {
+            html += `
+                <div class="card">
+                    <h3>${escapeHtml(item.name)}</h3>
+                    <p>📖 科目：${escapeHtml(item.subject)}</p>
+                    <p>📞 联系方式：${escapeHtml(item.contact)}</p>
+                    <p style="font-size:12px; color:#999;">发布时间：${new Date(item.created_at).toLocaleString()}</p>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+
+    // 防止XSS攻击
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // 页面加载时自动显示已有家教信息
+    loadTeachers();
+</script>
 
 </body>
 </html>
