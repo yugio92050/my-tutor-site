@@ -3,170 +3,287 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>大学生家教平台</title>
+<title>大学生家教平台 | 家长发布需求 · 大学生接单</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-body{
-    font-family: Arial, sans-serif;
-    max-width: 1000px;
+* { box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
-    background:#f5f5f5;
+    background: #f0f2f5;
 }
-header{
-    background:#4a90e2;
-    color:white;
-    text-align:center;
-    padding:30px;
-    border-radius:10px;
+header {
+    background: #2c3e66;
+    color: white;
+    text-align: center;
+    padding: 30px 20px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
-section{
-    background:white;
-    margin-top:20px;
-    padding:20px;
-    border-radius:10px;
+h1 { margin: 0 0 8px; font-size: 2rem; }
+header p { margin: 0; opacity: 0.9; }
+
+/* 两列布局 */
+.grid-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
 }
-.card{
-    border:1px solid #ddd;
-    padding:15px;
-    margin-top:10px;
-    border-radius:8px;
+.col {
+    flex: 1;
+    min-width: 320px;
 }
-.btn{
-    display:inline-block;
-    background:#4a90e2;
-    color:white;
-    padding:10px 20px;
-    text-decoration:none;
-    border-radius:5px;
-    margin-top:10px;
-    border:none;
-    cursor:pointer;
-    font-size:14px;
+section {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
-input{
+section h2 {
+    margin-top: 0;
+    border-left: 5px solid #4a90e2;
+    padding-left: 15px;
+    color: #1e2a3e;
+}
+.form-group {
+    margin-bottom: 16px;
+}
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: #2c3e50;
+}
+input, select {
     width: 100%;
-    padding: 8px;
-    margin: 8px 0;
+    padding: 10px 12px;
     border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    transition: 0.2s;
 }
-.form-group{
-    margin-bottom: 15px;
+input:focus, select:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74,144,226,0.2);
 }
+.btn {
+    background: #4a90e2;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: 0.2s;
+}
+.btn:hover {
+    background: #3570b0;
+    transform: translateY(-1px);
+}
+.card {
+    background: #fafcff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 16px;
+    margin-top: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.card h3 { margin: 0 0 8px; color: #1e466e; }
+.card p { margin: 6px 0; font-size: 0.9rem; }
+hr { margin: 20px 0; border: none; height: 1px; background: #e2e8f0; }
 </style>
 </head>
 <body>
 
 <header>
-    <h1>大学生家教平台</h1>
-    <p>家长发布需求 · 大学生发布接单信息 · 双方直接联系</p>
+    <h1>🎓 大学生 · 家教桥梁</h1>
+    <p>大学生发布接单信息 | 家长发布需求 | 直接联系</p>
 </header>
 
-<!-- 发布家教信息表单 -->
-<section>
-    <h2>✨ 发布你的家教信息</h2>
-    <div class="form-group">
-        <input type="text" id="name" placeholder="你的姓名">
-    </div>
-    <div class="form-group">
-        <input type="text" id="subject" placeholder="辅导科目（如：数学、英语）">
-    </div>
-    <div class="form-group">
-        <input type="text" id="contact" placeholder="联系方式（微信/电话）">
-    </div>
-    <button class="btn" onclick="publishPost()">立即发布</button>
-</section>
+<div class="grid-container">
+    <!-- 左侧：大学生发布区 -->
+    <div class="col">
+        <section>
+            <h2>✨ 大学生 · 发布家教信息</h2>
+            <form id="tutorForm">
+                <div class="form-group"><label>姓名 *</label><input type="text" id="tutor_name" placeholder="例：张明"></div>
+                <div class="form-group"><label>性别 *</label><input type="text" id="tutor_gender" placeholder="男/女"></div>
+                <div class="form-group"><label>年龄 *</label><input type="number" id="tutor_age" placeholder="20"></div>
+                <div class="form-group"><label>学校 *</label><input type="text" id="tutor_school" placeholder="中国传媒大学"></div>
+                <div class="form-group"><label>专业 *</label><input type="text" id="tutor_major" placeholder="英语专业"></div>
+                <div class="form-group"><label>可授课科目 *</label><input type="text" id="tutor_subjects" placeholder="数学、英语、物理"></div>
+                <div class="form-group"><label>可授课时间 *</label><input type="text" id="tutor_time" placeholder="周末全天 / 工作日晚上"></div>
+                <div class="form-group"><label>期望薪资 *</label><input type="text" id="tutor_salary" placeholder="150元/小时"></div>
+                <div class="form-group"><label>联系方式 (微信/电话) *</label><input type="text" id="tutor_contact" placeholder="微信号或手机号"></div>
+                <button type="button" class="btn" onclick="publishTutor()">📢 发布家教信息</button>
+            </form>
+        </section>
 
-<section>
-    <h2>📚 家教老师信息（实时更新）</h2>
-    <div id="teachersList">
-        <p>加载中...</p>
+        <section>
+            <h2>📚 大学生家教列表</h2>
+            <div id="tutorsList">加载中...</div>
+        </section>
     </div>
-</section>
 
-<section>
-    <h2>👪 家长需求信息</h2>
-    <div class="card">
-        <h3>初二数学辅导</h3>
-        <p>地区：北京市朝阳区</p>
-        <p>预算：150元/小时</p>
-        <p>联系方式：微信xxxxxx</p>
-    </div>
-    <div class="card">
-        <h3>小学英语辅导</h3>
-        <p>地区：线上</p>
-        <p>预算：100元/小时</p>
-        <p>联系方式：微信xxxxxx</p>
-    </div>
-</section>
+    <!-- 右侧：家长发布区 -->
+    <div class="col">
+        <section>
+            <h2>👪 家长 · 发布需求</h2>
+            <form id="parentForm">
+                <div class="form-group"><label>孩子年级 *</label><input type="text" id="parent_grade" placeholder="初二 / 高一"></div>
+                <div class="form-group"><label>辅导科目 *</label><input type="text" id="parent_subject" placeholder="数学"></div>
+                <div class="form-group"><label>所在地区 *</label><input type="text" id="parent_district" placeholder="北京市朝阳区 / 线上"></div>
+                <div class="form-group"><label>预算 (元/小时) *</label><input type="text" id="parent_budget" placeholder="120-180元"></div>
+                <div class="form-group"><label>联系方式 *</label><input type="text" id="parent_contact" placeholder="微信号或手机号"></div>
+                <button type="button" class="btn" onclick="publishParentRequest()">📢 发布需求</button>
+            </form>
+        </section>
 
-<section>
-    <h2>平台说明</h2>
-    <p>本平台为大学生与家长提供信息发布服务，请自行核实身份信息并沟通授课安排。</p>
+        <section>
+            <h2>📌 家长需求列表</h2>
+            <div id="parentRequestsList">加载中...</div>
+        </section>
+    </div>
+</div>
+
+<section style="margin-top:10px">
+    <h2>📢 平台说明</h2>
+    <p>信息真实有效，请自行核实身份。所有信息均为用户自主发布，平台仅做展示。</p>
 </section>
 
 <script>
-    // 配置 Supabase（确保没有重复声明）
+    // ---------- Supabase 配置（使用你已有的项目）----------
     const SUPABASE_URL = 'https://ftbfuvwvfeldriwzrfjq.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_pZb0TC_3QVvRHvmWalsdmg_gVzCVomq';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function publishPost() {
-        const name = document.getElementById('name').value.trim();
-        const subject = document.getElementById('subject').value.trim();
-        const contact = document.getElementById('contact').value.trim();
+    // ================= 大学生家教部分 =================
+    async function publishTutor() {
+        const name = document.getElementById('tutor_name').value.trim();
+        const gender = document.getElementById('tutor_gender').value.trim();
+        const age = parseInt(document.getElementById('tutor_age').value);
+        const school = document.getElementById('tutor_school').value.trim();
+        const major = document.getElementById('tutor_major').value.trim();
+        const subjects = document.getElementById('tutor_subjects').value.trim();
+        const available_time = document.getElementById('tutor_time').value.trim();
+        const expected_salary = document.getElementById('tutor_salary').value.trim();
+        const contact = document.getElementById('tutor_contact').value.trim();
 
-        if (!name || !subject || !contact) {
-            alert('请填写姓名、科目和联系方式');
+        if (!name || !gender || isNaN(age) || !school || !major || !subjects || !available_time || !expected_salary || !contact) {
+            alert('请完整填写所有大学生字段');
             return;
         }
 
-        const { error } = await supabaseClient
-            .from('posts')
-            .insert([{ name, subject, contact }]);
+        const { error } = await supabase
+            .from('tutors')
+            .insert([{ name, gender, age, school, major, subjects, available_time, expected_salary, contact }]);
 
         if (error) {
             console.error('发布失败:', error);
             alert('发布失败: ' + error.message);
         } else {
-            alert('发布成功！');
-            document.getElementById('name').value = '';
-            document.getElementById('subject').value = '';
-            document.getElementById('contact').value = '';
-            loadTeachers();
+            alert('家教信息发布成功！');
+            document.getElementById('tutorForm').reset();
+            loadTutors();
         }
     }
 
-    async function loadTeachers() {
-        const { data, error } = await supabaseClient
-            .from('posts')
+    async function loadTutors() {
+        const { data, error } = await supabase
+            .from('tutors')
             .select('*')
             .order('created_at', { ascending: false });
 
-        const container = document.getElementById('teachersList');
-
+        const container = document.getElementById('tutorsList');
         if (error) {
-            console.error('加载失败:', error);
-            container.innerHTML = '<p>⚠️ 加载失败，请检查网络或数据库配置</p>';
+            console.error(error);
+            container.innerHTML = '<p>⚠️ 加载失败，请刷新页面</p>';
             return;
         }
-
         if (!data || data.length === 0) {
-            container.innerHTML = '<p>暂无家教信息，快来发布第一条吧 ✨</p>';
+            container.innerHTML = '<p>✨ 暂无家教信息，快来发布第一条吧</p>';
             return;
         }
-
         let html = '';
-        for (let item of data) {
+        for (let t of data) {
             html += `
                 <div class="card">
-                    <h3>${escapeHtml(item.name)}</h3>
-                    <p>📖 科目：${escapeHtml(item.subject)}</p>
-                    <p>📞 联系方式：${escapeHtml(item.contact)}</p>
-                    <p style="font-size:12px; color:#999;">发布时间：${new Date(item.created_at).toLocaleString()}</p>
+                    <h3>${escapeHtml(t.name)} | ${escapeHtml(t.gender)} | ${t.age}岁</h3>
+                    <p>🏫 ${escapeHtml(t.school)} · ${escapeHtml(t.major)}</p>
+                    <p>📚 可授科目：${escapeHtml(t.subjects)}</p>
+                    <p>⏰ 可授课时间：${escapeHtml(t.available_time)}</p>
+                    <p>💰 期望薪资：${escapeHtml(t.expected_salary)}</p>
+                    <p>📞 联系方式：${escapeHtml(t.contact)}</p>
+                    <p style="font-size:11px; color:#aaa;">发布时间：${new Date(t.created_at).toLocaleString()}</p>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+
+    // ================= 家长需求部分 =================
+    async function publishParentRequest() {
+        const child_grade = document.getElementById('parent_grade').value.trim();
+        const subject = document.getElementById('parent_subject').value.trim();
+        const district = document.getElementById('parent_district').value.trim();
+        const budget = document.getElementById('parent_budget').value.trim();
+        const contact = document.getElementById('parent_contact').value.trim();
+
+        if (!child_grade || !subject || !district || !budget || !contact) {
+            alert('请完整填写家长需求所有字段');
+            return;
+        }
+
+        const { error } = await supabase
+            .from('parent_requests')
+            .insert([{ child_grade, subject, district, budget, contact }]);
+
+        if (error) {
+            console.error('发布失败:', error);
+            alert('发布失败: ' + error.message);
+        } else {
+            alert('需求发布成功！');
+            document.getElementById('parent_grade').value = '';
+            document.getElementById('parent_subject').value = '';
+            document.getElementById('parent_district').value = '';
+            document.getElementById('parent_budget').value = '';
+            document.getElementById('parent_contact').value = '';
+            loadParentRequests();
+        }
+    }
+
+    async function loadParentRequests() {
+        const { data, error } = await supabase
+            .from('parent_requests')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        const container = document.getElementById('parentRequestsList');
+        if (error) {
+            console.error(error);
+            container.innerHTML = '<p>⚠️ 加载失败，请刷新页面</p>';
+            return;
+        }
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p>📭 暂无家长需求，快来发布一条吧</p>';
+            return;
+        }
+        let html = '';
+        for (let r of data) {
+            html += `
+                <div class="card">
+                    <h3>📖  ${escapeHtml(r.child_grade)} · ${escapeHtml(r.subject)}</h3>
+                    <p>📍 地区：${escapeHtml(r.district)}</p>
+                    <p>💰 预算：${escapeHtml(r.budget)} 元/小时</p>
+                    <p>📞 联系方式：${escapeHtml(r.contact)}</p>
+                    <p style="font-size:11px; color:#aaa;">发布时间：${new Date(r.created_at).toLocaleString()}</p>
                 </div>
             `;
         }
@@ -183,8 +300,9 @@ input{
         });
     }
 
-    loadTeachers();
+    // 页面加载时获取数据
+    loadTutors();
+    loadParentRequests();
 </script>
-
 </body>
 </html>
