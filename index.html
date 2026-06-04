@@ -70,12 +70,11 @@
 
 <script>
     (function() {
-        // ---------- 替换成你的 Supabase 配置 ----------
+        // ---------- 请替换成你自己的 Supabase 配置 ----------
         const SUPABASE_URL = 'https://ftbfuvwvfeldriwzrfjq.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_pZb0TC_3QVvRHvmWalsdmg_gVzCVomq';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // 辅助函数
         function escapeHtml(str) {
             if (!str) return '';
             return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
@@ -85,7 +84,7 @@
             return Math.random().toString(36).substring(2, 10);
         }
 
-        // 加载所有大学生信息（显示所有，但只有输入正确密码才能编辑/删除）
+        // 加载所有家教信息
         async function loadTutors() {
             const { data, error } = await supabase.from('tutors').select('*').order('created_at', { ascending: false });
             const container = document.getElementById('tutorList');
@@ -94,7 +93,7 @@
             let html = '';
             for (let t of data) {
                 html += `
-                    <div class="card" data-id="${t.id}">
+                    <div class="card">
                         <div class="card-actions">
                             <button class="btn-small btn-warning" onclick="editTutor('${t.id}')">✏️编辑</button>
                             <button class="btn-small btn-danger" onclick="deleteTutor('${t.id}')">🗑️删除</button>
@@ -121,7 +120,7 @@
             let html = '';
             for (let r of data) {
                 html += `
-                    <div class="card" data-id="${r.id}">
+                    <div class="card">
                         <div class="card-actions">
                             <button class="btn-small btn-warning" onclick="editParent('${r.id}')">✏️编辑</button>
                             <button class="btn-small btn-danger" onclick="deleteParent('${r.id}')">🗑️删除</button>
@@ -151,7 +150,7 @@
             let edit_key = document.getElementById('tutor_key').value.trim();
             if (!edit_key) edit_key = generateRandomKey();
             if (!name || !gender || isNaN(age) || !school || !major || !subjects || !available_time || !expected_salary || !contact) {
-                alert('请完整填写所有字段');
+                alert('请完整填写所有大学生字段');
                 return;
             }
             const { error } = await supabase.from('tutors').insert([{
@@ -159,7 +158,8 @@
             }]);
             if (error) { alert('发布失败: ' + error.message); console.error(error); }
             else {
-                alert(`发布成功！请记住编辑密码：${edit_key}`);
+                alert(`✅ 发布成功！请记住编辑密码：${edit_key}`);
+                // 清空表单
                 document.getElementById('tutor_name').value = '';
                 document.getElementById('tutor_gender').value = '';
                 document.getElementById('tutor_age').value = '';
@@ -183,7 +183,7 @@
             let edit_key = document.getElementById('parent_key').value.trim();
             if (!edit_key) edit_key = generateRandomKey();
             if (!child_grade || !subject || !district || !budget || !contact) {
-                alert('请完整填写所有字段');
+                alert('请完整填写所有家长需求字段');
                 return;
             }
             const { error } = await supabase.from('parent_requests').insert([{
@@ -191,7 +191,7 @@
             }]);
             if (error) { alert('发布失败: ' + error.message); }
             else {
-                alert(`需求发布成功！请记住编辑密码：${edit_key}`);
+                alert(`✅ 需求发布成功！请记住编辑密码：${edit_key}`);
                 document.getElementById('parent_grade').value = '';
                 document.getElementById('parent_subject').value = '';
                 document.getElementById('parent_district').value = '';
@@ -202,11 +202,10 @@
             }
         }
 
-        // 编辑/删除（需要验证密码）
+        // 编辑/删除函数（需要验证密码）
         window.editTutor = async function(id) {
             const key = prompt('请输入该帖子的编辑密码：');
             if (!key) return;
-            // 先获取原数据
             const { data, error } = await supabase.from('tutors').select('*').eq('id', id).single();
             if (error || !data) { alert('获取信息失败'); return; }
             if (data.edit_key !== key) { alert('密码错误，无法编辑'); return; }
