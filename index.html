@@ -69,216 +69,211 @@
 </div>
 
 <script>
-    // 使用 IIFE 避免全局污染
-    (function() {
-        // ---------- 请替换成你自己的 Supabase 配置 ----------
-        const SUPABASE_URL = 'https://ftbfuvwvfeldriwzrfjq.supabase.co';   // 改成你的
-        const SUPABASE_ANON_KEY = 'sb_publishable_pZb0TC_3QVvRHvmWalsdmg_gVzCVomq'; // 改成你的
-        // 注意：使用 window.supabase 确保调用全局对象
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ---------- 请修改成你的 Supabase 项目配置 ----------
+    const MY_SUPABASE_URL = 'https://ftbfuvwvfeldriwzrfjq.supabase.co';   // 替换成你的
+    const MY_SUPABASE_ANON_KEY = 'sb_publishable_pZb0TC_3QVvRHvmWalsdmg_gVzCVomq'; // 替换成你的
+    // ---------- 不要修改下面代码，只改上面两行 ----------
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
-        }
+    // 使用 window.supabase 确保全局存在
+    const sb = window.supabase.createClient(MY_SUPABASE_URL, MY_SUPABASE_ANON_KEY);
 
-        function generateRandomKey() {
-            return Math.random().toString(36).substring(2, 10);
-        }
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
+    }
+    function generateRandomKey() {
+        return Math.random().toString(36).substring(2, 10);
+    }
 
-        // 加载所有家教信息
-        async function loadTutors() {
-            const { data, error } = await supabaseClient.from('tutors').select('*').order('created_at', { ascending: false });
-            const container = document.getElementById('tutorList');
-            if (error) { container.innerHTML = '<p>加载失败</p>'; return; }
-            if (!data || data.length === 0) { container.innerHTML = '<p>暂无数据</p>'; return; }
-            let html = '';
-            for (let t of data) {
-                html += `
-                    <div class="card">
-                        <div class="card-actions">
-                            <button class="btn-small btn-warning" onclick="editTutor('${t.id}')">✏️编辑</button>
-                            <button class="btn-small btn-danger" onclick="deleteTutor('${t.id}')">🗑️删除</button>
-                        </div>
-                        <h3>${escapeHtml(t.name)} | ${t.gender} | ${t.age}岁</h3>
-                        <p>🏫 ${escapeHtml(t.school)} · ${escapeHtml(t.major)}</p>
-                        <p>📚 可授科目：${escapeHtml(t.subjects)}</p>
-                        <p>⏰ 时间：${escapeHtml(t.available_time)}</p>
-                        <p>💰 薪资：${escapeHtml(t.expected_salary)}</p>
-                        <p>📞 ${escapeHtml(t.contact)}</p>
-                        <div class="edit-key-note">🔑 编辑密码：${escapeHtml(t.edit_key)}</div>
-                        <small>${new Date(t.created_at).toLocaleString()}</small>
+    // 加载家教信息
+    async function loadTutors() {
+        const { data, error } = await sb.from('tutors').select('*').order('created_at', { ascending: false });
+        const container = document.getElementById('tutorList');
+        if (error) { container.innerHTML = '<p>加载失败</p>'; return; }
+        if (!data || data.length === 0) { container.innerHTML = '<p>暂无数据</p>'; return; }
+        let html = '';
+        for (let t of data) {
+            html += `
+                <div class="card">
+                    <div class="card-actions">
+                        <button class="btn-small btn-warning" onclick="editTutor('${t.id}')">✏️编辑</button>
+                        <button class="btn-small btn-danger" onclick="deleteTutor('${t.id}')">🗑️删除</button>
                     </div>
-                `;
-            }
-            container.innerHTML = html;
+                    <h3>${escapeHtml(t.name)} | ${t.gender} | ${t.age}岁</h3>
+                    <p>🏫 ${escapeHtml(t.school)} · ${escapeHtml(t.major)}</p>
+                    <p>📚 可授科目：${escapeHtml(t.subjects)}</p>
+                    <p>⏰ 时间：${escapeHtml(t.available_time)}</p>
+                    <p>💰 薪资：${escapeHtml(t.expected_salary)}</p>
+                    <p>📞 ${escapeHtml(t.contact)}</p>
+                    <div class="edit-key-note">🔑 编辑密码：${escapeHtml(t.edit_key)}</div>
+                    <small>${new Date(t.created_at).toLocaleString()}</small>
+                </div>
+            `;
         }
+        container.innerHTML = html;
+    }
 
-        async function loadParents() {
-            const { data, error } = await supabaseClient.from('parent_requests').select('*').order('created_at', { ascending: false });
-            const container = document.getElementById('parentList');
-            if (error) { container.innerHTML = '<p>加载失败</p>'; return; }
-            if (!data || data.length === 0) { container.innerHTML = '<p>暂无需求</p>'; return; }
-            let html = '';
-            for (let r of data) {
-                html += `
-                    <div class="card">
-                        <div class="card-actions">
-                            <button class="btn-small btn-warning" onclick="editParent('${r.id}')">✏️编辑</button>
-                            <button class="btn-small btn-danger" onclick="deleteParent('${r.id}')">🗑️删除</button>
-                        </div>
-                        <h3>📖 ${escapeHtml(r.child_grade)} · ${escapeHtml(r.subject)}</h3>
-                        <p>📍 ${escapeHtml(r.district)} | 💰 ${escapeHtml(r.budget)}元/小时</p>
-                        <p>📞 ${escapeHtml(r.contact)}</p>
-                        <div class="edit-key-note">🔑 编辑密码：${escapeHtml(r.edit_key)}</div>
-                        <small>${new Date(r.created_at).toLocaleString()}</small>
+    // 加载家长需求
+    async function loadParents() {
+        const { data, error } = await sb.from('parent_requests').select('*').order('created_at', { ascending: false });
+        const container = document.getElementById('parentList');
+        if (error) { container.innerHTML = '<p>加载失败</p>'; return; }
+        if (!data || data.length === 0) { container.innerHTML = '<p>暂无需求</p>'; return; }
+        let html = '';
+        for (let r of data) {
+            html += `
+                <div class="card">
+                    <div class="card-actions">
+                        <button class="btn-small btn-warning" onclick="editParent('${r.id}')">✏️编辑</button>
+                        <button class="btn-small btn-danger" onclick="deleteParent('${r.id}')">🗑️删除</button>
                     </div>
-                `;
-            }
-            container.innerHTML = html;
+                    <h3>📖 ${escapeHtml(r.child_grade)} · ${escapeHtml(r.subject)}</h3>
+                    <p>📍 ${escapeHtml(r.district)} | 💰 ${escapeHtml(r.budget)}元/小时</p>
+                    <p>📞 ${escapeHtml(r.contact)}</p>
+                    <div class="edit-key-note">🔑 编辑密码：${escapeHtml(r.edit_key)}</div>
+                    <small>${new Date(r.created_at).toLocaleString()}</small>
+                </div>
+            `;
         }
+        container.innerHTML = html;
+    }
 
-        // 发布大学生
-        async function publishTutor() {
-            const name = document.getElementById('tutor_name').value.trim();
-            const gender = document.getElementById('tutor_gender').value.trim();
-            const age = parseInt(document.getElementById('tutor_age').value);
-            const school = document.getElementById('tutor_school').value.trim();
-            const major = document.getElementById('tutor_major').value.trim();
-            const subjects = document.getElementById('tutor_subjects').value.trim();
-            const available_time = document.getElementById('tutor_time').value.trim();
-            const expected_salary = document.getElementById('tutor_salary').value.trim();
-            const contact = document.getElementById('tutor_contact').value.trim();
-            let edit_key = document.getElementById('tutor_key').value.trim();
-            if (!edit_key) edit_key = generateRandomKey();
-            if (!name || !gender || isNaN(age) || !school || !major || !subjects || !available_time || !expected_salary || !contact) {
-                alert('请完整填写所有大学生字段');
-                return;
-            }
-            const { error } = await supabaseClient.from('tutors').insert([{
-                name, gender, age, school, major, subjects, available_time, expected_salary, contact, edit_key
-            }]);
-            if (error) { alert('发布失败: ' + error.message); console.error(error); }
-            else {
-                alert(`✅ 发布成功！请记住编辑密码：${edit_key}`);
-                document.getElementById('tutor_name').value = '';
-                document.getElementById('tutor_gender').value = '';
-                document.getElementById('tutor_age').value = '';
-                document.getElementById('tutor_school').value = '';
-                document.getElementById('tutor_major').value = '';
-                document.getElementById('tutor_subjects').value = '';
-                document.getElementById('tutor_time').value = '';
-                document.getElementById('tutor_salary').value = '';
-                document.getElementById('tutor_contact').value = '';
-                document.getElementById('tutor_key').value = '';
-                loadTutors();
-            }
+    // 发布家教信息
+    async function publishTutor() {
+        const name = document.getElementById('tutor_name').value.trim();
+        const gender = document.getElementById('tutor_gender').value.trim();
+        const age = parseInt(document.getElementById('tutor_age').value);
+        const school = document.getElementById('tutor_school').value.trim();
+        const major = document.getElementById('tutor_major').value.trim();
+        const subjects = document.getElementById('tutor_subjects').value.trim();
+        const available_time = document.getElementById('tutor_time').value.trim();
+        const expected_salary = document.getElementById('tutor_salary').value.trim();
+        const contact = document.getElementById('tutor_contact').value.trim();
+        let edit_key = document.getElementById('tutor_key').value.trim();
+        if (!edit_key) edit_key = generateRandomKey();
+        if (!name || !gender || isNaN(age) || !school || !major || !subjects || !available_time || !expected_salary || !contact) {
+            alert('请完整填写所有大学生字段');
+            return;
         }
-
-        async function publishParent() {
-            const child_grade = document.getElementById('parent_grade').value.trim();
-            const subject = document.getElementById('parent_subject').value.trim();
-            const district = document.getElementById('parent_district').value.trim();
-            const budget = document.getElementById('parent_budget').value.trim();
-            const contact = document.getElementById('parent_contact').value.trim();
-            let edit_key = document.getElementById('parent_key').value.trim();
-            if (!edit_key) edit_key = generateRandomKey();
-            if (!child_grade || !subject || !district || !budget || !contact) {
-                alert('请完整填写所有家长需求字段');
-                return;
-            }
-            const { error } = await supabaseClient.from('parent_requests').insert([{
-                child_grade, subject, district, budget, contact, edit_key
-            }]);
-            if (error) { alert('发布失败: ' + error.message); }
-            else {
-                alert(`✅ 需求发布成功！请记住编辑密码：${edit_key}`);
-                document.getElementById('parent_grade').value = '';
-                document.getElementById('parent_subject').value = '';
-                document.getElementById('parent_district').value = '';
-                document.getElementById('parent_budget').value = '';
-                document.getElementById('parent_contact').value = '';
-                document.getElementById('parent_key').value = '';
-                loadParents();
-            }
+        const { error } = await sb.from('tutors').insert([{ name, gender, age, school, major, subjects, available_time, expected_salary, contact, edit_key }]);
+        if (error) { alert('发布失败: ' + error.message); console.error(error); }
+        else {
+            alert(`✅ 发布成功！请记住编辑密码：${edit_key}`);
+            document.getElementById('tutor_name').value = '';
+            document.getElementById('tutor_gender').value = '';
+            document.getElementById('tutor_age').value = '';
+            document.getElementById('tutor_school').value = '';
+            document.getElementById('tutor_major').value = '';
+            document.getElementById('tutor_subjects').value = '';
+            document.getElementById('tutor_time').value = '';
+            document.getElementById('tutor_salary').value = '';
+            document.getElementById('tutor_contact').value = '';
+            document.getElementById('tutor_key').value = '';
+            loadTutors();
         }
+    }
 
-        // 编辑/删除函数（挂载到 window 以便 onclick 调用）
-        window.editTutor = async function(id) {
-            const key = prompt('请输入该帖子的编辑密码：');
-            if (!key) return;
-            const { data, error } = await supabaseClient.from('tutors').select('*').eq('id', id).single();
-            if (error || !data) { alert('获取信息失败'); return; }
-            if (data.edit_key !== key) { alert('密码错误，无法编辑'); return; }
-            const newName = prompt('修改姓名', data.name);
-            if (newName === null) return;
-            const newGender = prompt('修改性别', data.gender);
-            const newAge = parseInt(prompt('修改年龄', data.age));
-            const newSchool = prompt('修改学校', data.school);
-            const newMajor = prompt('修改专业', data.major);
-            const newSubjects = prompt('修改科目', data.subjects);
-            const newTime = prompt('修改可授课时间', data.available_time);
-            const newSalary = prompt('修改期望薪资', data.expected_salary);
-            const newContact = prompt('修改联系方式', data.contact);
-            const { error: updateError } = await supabaseClient
-                .from('tutors')
-                .update({ name: newName, gender: newGender, age: newAge, school: newSchool, major: newMajor, subjects: newSubjects, available_time: newTime, expected_salary: newSalary, contact: newContact })
-                .eq('id', id);
-            if (updateError) alert('更新失败: ' + updateError.message);
-            else { alert('更新成功'); loadTutors(); }
-        };
+    // 发布家长需求
+    async function publishParent() {
+        const child_grade = document.getElementById('parent_grade').value.trim();
+        const subject = document.getElementById('parent_subject').value.trim();
+        const district = document.getElementById('parent_district').value.trim();
+        const budget = document.getElementById('parent_budget').value.trim();
+        const contact = document.getElementById('parent_contact').value.trim();
+        let edit_key = document.getElementById('parent_key').value.trim();
+        if (!edit_key) edit_key = generateRandomKey();
+        if (!child_grade || !subject || !district || !budget || !contact) {
+            alert('请完整填写所有家长需求字段');
+            return;
+        }
+        const { error } = await sb.from('parent_requests').insert([{ child_grade, subject, district, budget, contact, edit_key }]);
+        if (error) { alert('发布失败: ' + error.message); }
+        else {
+            alert(`✅ 需求发布成功！请记住编辑密码：${edit_key}`);
+            document.getElementById('parent_grade').value = '';
+            document.getElementById('parent_subject').value = '';
+            document.getElementById('parent_district').value = '';
+            document.getElementById('parent_budget').value = '';
+            document.getElementById('parent_contact').value = '';
+            document.getElementById('parent_key').value = '';
+            loadParents();
+        }
+    }
 
-        window.deleteTutor = async function(id) {
-            const key = prompt('请输入该帖子的编辑密码：');
-            if (!key) return;
-            const { data, error } = await supabaseClient.from('tutors').select('edit_key').eq('id', id).single();
-            if (error) { alert('获取信息失败'); return; }
-            if (data.edit_key !== key) { alert('密码错误，无法删除'); return; }
-            if (!confirm('确定删除吗？')) return;
-            const { error: delError } = await supabaseClient.from('tutors').delete().eq('id', id);
-            if (delError) alert('删除失败: ' + delError.message);
-            else { alert('删除成功'); loadTutors(); }
-        };
+    // 编辑/删除（挂载到 window 供 onclick 调用）
+    window.editTutor = async function(id) {
+        const key = prompt('请输入该帖子的编辑密码：');
+        if (!key) return;
+        const { data, error } = await sb.from('tutors').select('*').eq('id', id).single();
+        if (error || !data) { alert('获取信息失败'); return; }
+        if (data.edit_key !== key) { alert('密码错误，无法编辑'); return; }
+        const newName = prompt('修改姓名', data.name);
+        if (newName === null) return;
+        const newGender = prompt('修改性别', data.gender);
+        const newAge = parseInt(prompt('修改年龄', data.age));
+        const newSchool = prompt('修改学校', data.school);
+        const newMajor = prompt('修改专业', data.major);
+        const newSubjects = prompt('修改科目', data.subjects);
+        const newTime = prompt('修改可授课时间', data.available_time);
+        const newSalary = prompt('修改期望薪资', data.expected_salary);
+        const newContact = prompt('修改联系方式', data.contact);
+        const { error: updateError } = await sb.from('tutors').update({
+            name: newName, gender: newGender, age: newAge, school: newSchool, major: newMajor,
+            subjects: newSubjects, available_time: newTime, expected_salary: newSalary, contact: newContact
+        }).eq('id', id);
+        if (updateError) alert('更新失败: ' + updateError.message);
+        else { alert('更新成功'); loadTutors(); }
+    };
 
-        window.editParent = async function(id) {
-            const key = prompt('请输入该需求的编辑密码：');
-            if (!key) return;
-            const { data, error } = await supabaseClient.from('parent_requests').select('*').eq('id', id).single();
-            if (error || !data) { alert('获取信息失败'); return; }
-            if (data.edit_key !== key) { alert('密码错误'); return; }
-            const newGrade = prompt('修改年级', data.child_grade);
-            const newSubject = prompt('修改科目', data.subject);
-            const newDistrict = prompt('修改地区', data.district);
-            const newBudget = prompt('修改预算', data.budget);
-            const newContact = prompt('修改联系方式', data.contact);
-            const { error: updateError } = await supabaseClient
-                .from('parent_requests')
-                .update({ child_grade: newGrade, subject: newSubject, district: newDistrict, budget: newBudget, contact: newContact })
-                .eq('id', id);
-            if (updateError) alert('更新失败');
-            else { alert('更新成功'); loadParents(); }
-        };
+    window.deleteTutor = async function(id) {
+        const key = prompt('请输入该帖子的编辑密码：');
+        if (!key) return;
+        const { data, error } = await sb.from('tutors').select('edit_key').eq('id', id).single();
+        if (error) { alert('获取信息失败'); return; }
+        if (data.edit_key !== key) { alert('密码错误，无法删除'); return; }
+        if (!confirm('确定删除吗？')) return;
+        const { error: delError } = await sb.from('tutors').delete().eq('id', id);
+        if (delError) alert('删除失败: ' + delError.message);
+        else { alert('删除成功'); loadTutors(); }
+    };
 
-        window.deleteParent = async function(id) {
-            const key = prompt('请输入该需求的编辑密码：');
-            if (!key) return;
-            const { data, error } = await supabaseClient.from('parent_requests').select('edit_key').eq('id', id).single();
-            if (error) { alert('获取信息失败'); return; }
-            if (data.edit_key !== key) { alert('密码错误'); return; }
-            if (!confirm('确定删除吗？')) return;
-            const { error: delError } = await supabaseClient.from('parent_requests').delete().eq('id', id);
-            if (delError) alert('删除失败');
-            else { alert('删除成功'); loadParents(); }
-        };
+    window.editParent = async function(id) {
+        const key = prompt('请输入该需求的编辑密码：');
+        if (!key) return;
+        const { data, error } = await sb.from('parent_requests').select('*').eq('id', id).single();
+        if (error || !data) { alert('获取信息失败'); return; }
+        if (data.edit_key !== key) { alert('密码错误'); return; }
+        const newGrade = prompt('修改年级', data.child_grade);
+        const newSubject = prompt('修改科目', data.subject);
+        const newDistrict = prompt('修改地区', data.district);
+        const newBudget = prompt('修改预算', data.budget);
+        const newContact = prompt('修改联系方式', data.contact);
+        const { error: updateError } = await sb.from('parent_requests').update({
+            child_grade: newGrade, subject: newSubject, district: newDistrict, budget: newBudget, contact: newContact
+        }).eq('id', id);
+        if (updateError) alert('更新失败');
+        else { alert('更新成功'); loadParents(); }
+    };
 
-        // 绑定发布按钮事件
-        document.getElementById('tutorBtn').onclick = publishTutor;
-        document.getElementById('parentBtn').onclick = publishParent;
+    window.deleteParent = async function(id) {
+        const key = prompt('请输入该需求的编辑密码：');
+        if (!key) return;
+        const { data, error } = await sb.from('parent_requests').select('edit_key').eq('id', id).single();
+        if (error) { alert('获取信息失败'); return; }
+        if (data.edit_key !== key) { alert('密码错误'); return; }
+        if (!confirm('确定删除吗？')) return;
+        const { error: delError } = await sb.from('parent_requests').delete().eq('id', id);
+        if (delError) alert('删除失败');
+        else { alert('删除成功'); loadParents(); }
+    };
 
-        // 初始化加载数据
-        loadTutors();
-        loadParents();
-    })();
+    // 绑定发布按钮
+    document.getElementById('tutorBtn').onclick = publishTutor;
+    document.getElementById('parentBtn').onclick = publishParent;
+
+    // 初始化加载
+    loadTutors();
+    loadParents();
 </script>
 </body>
 </html>
