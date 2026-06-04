@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>发布信息</title>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
+
 <body>
 
 <h1>发布家教信息</h1>
@@ -18,24 +22,46 @@
 <div id="list"></div>
 
 <script>
-function post(){
-    let data = JSON.parse(localStorage.getItem("posts") || "[]");
+const supabase = supabase.createClient(
+  "https://ircomtgwhaecyxwqheey.supabase.co",
+  "你的 publishable key"
+);
 
-    data.push({
-        name: document.getElementById("name").value,
-        subject: document.getElementById("subject").value,
-        contact: document.getElementById("contact").value
-    });
+async function post() {
+    const name = document.getElementById("name").value;
+    const subject = document.getElementById("subject").value;
+    const contact = document.getElementById("contact").value;
 
-    localStorage.setItem("posts", JSON.stringify(data));
-    render();
+    const { error } = await supabase
+        .from('posts')
+        .insert([
+            {
+                name,
+                subject,
+                contact
+            }
+        ]);
+
+    if (!error) {
+        document.getElementById("name").value = "";
+        document.getElementById("subject").value = "";
+        document.getElementById("contact").value = "";
+        render();
+    } else {
+        console.log(error);
+    }
 }
 
-function render(){
-    let data = JSON.parse(localStorage.getItem("posts") || "[]");
+async function render() {
+
+    let { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
     let html = "";
 
-    data.forEach(item=>{
+    (data || []).forEach(item => {
         html += `<p>${item.name}｜${item.subject}｜${item.contact}</p>`;
     });
 
