@@ -14,7 +14,6 @@ body{
     padding: 20px;
     background:#f5f5f5;
 }
-
 header{
     background:#4a90e2;
     color:white;
@@ -22,21 +21,18 @@ header{
     padding:30px;
     border-radius:10px;
 }
-
 section{
     background:white;
     margin-top:20px;
     padding:20px;
     border-radius:10px;
 }
-
 .card{
     border:1px solid #ddd;
     padding:15px;
     margin-top:10px;
     border-radius:8px;
 }
-
 .btn{
     display:inline-block;
     background:#4a90e2;
@@ -49,7 +45,6 @@ section{
     cursor:pointer;
     font-size:14px;
 }
-
 input, textarea{
     width: 100%;
     padding: 8px;
@@ -58,13 +53,11 @@ input, textarea{
     border-radius: 5px;
     box-sizing: border-box;
 }
-
 .form-group{
     margin-bottom: 15px;
 }
 </style>
 </head>
-
 <body>
 
 <header>
@@ -116,12 +109,12 @@ input, textarea{
 </section>
 
 <script>
-    // 你的 Supabase 配置（已填写正确）
+    // 你的 Supabase 配置
     const SUPABASE_URL = 'https://kcrmenyvswngb9gnu.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_kcRMEnY_vsWngb9GNU-GiQ_oMcq-jeB';
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // 发布新帖子
+    // 发布新帖子 - 注意函数名要和按钮 onclick 一致
     async function publishPost() {
         const name = document.getElementById('name').value.trim();
         const subject = document.getElementById('subject').value.trim();
@@ -138,7 +131,7 @@ input, textarea{
 
         if (error) {
             console.error('发布失败:', error);
-            alert('发布失败，请按F12查看控制台错误');
+            alert('发布失败：' + error.message);
         } else {
             alert('发布成功！');
             document.getElementById('name').value = '';
@@ -159,7 +152,7 @@ input, textarea{
 
         if (error) {
             console.error('加载失败:', error);
-            container.innerHTML = '<p>⚠️ 加载失败，请刷新页面重试</p>';
+            container.innerHTML = '<p>⚠️ 加载失败，请检查网络或数据库配置</p>';
             return;
         }
 
