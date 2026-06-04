@@ -45,7 +45,7 @@ section{
     cursor:pointer;
     font-size:14px;
 }
-input, textarea{
+input{
     width: 100%;
     padding: 8px;
     margin: 8px 0;
@@ -62,7 +62,7 @@ input, textarea{
 
 <header>
     <h1>大学生家教平台</h1>
-    <p>家长发布需求 · 大学生发布家教信息 · 双方直接联系</p>
+    <p>家长发布需求 · 大学生发布接单信息 · 双方直接联系</p>
 </header>
 
 <!-- 发布家教信息表单 -->
@@ -109,12 +109,11 @@ input, textarea{
 </section>
 
 <script>
-    // 你的 Supabase 配置
+    // 配置 Supabase（确保没有重复声明）
     const SUPABASE_URL = 'https://kcrmenyvswngb9gnu.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_kcRMEnY_vsWngb9GNU-GiQ_oMcq-jeB';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // 发布新帖子 - 注意函数名要和按钮 onclick 一致
     async function publishPost() {
         const name = document.getElementById('name').value.trim();
         const subject = document.getElementById('subject').value.trim();
@@ -125,25 +124,24 @@ input, textarea{
             return;
         }
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('posts')
             .insert([{ name, subject, contact }]);
 
         if (error) {
             console.error('发布失败:', error);
-            alert('发布失败：' + error.message);
+            alert('发布失败: ' + error.message);
         } else {
             alert('发布成功！');
             document.getElementById('name').value = '';
             document.getElementById('subject').value = '';
             document.getElementById('contact').value = '';
-            loadTeachers();  // 刷新列表
+            loadTeachers();
         }
     }
 
-    // 加载所有家教信息
     async function loadTeachers() {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('posts')
             .select('*')
             .order('created_at', { ascending: false });
@@ -175,7 +173,6 @@ input, textarea{
         container.innerHTML = html;
     }
 
-    // 防止XSS攻击
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, function(m) {
@@ -186,7 +183,6 @@ input, textarea{
         });
     }
 
-    // 页面加载时自动显示已有家教信息
     loadTeachers();
 </script>
 
