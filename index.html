@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>家教平台 | 密码管理帖子</title>
+    <title>家教平台 | 大学生 & 家长</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         *{box-sizing:border-box;}
         body{font-family:system-ui;max-width:1400px;margin:0 auto;padding:20px;background:#f0f2f5;}
-        header{background:#2c3e66;color:white;text-align:center;padding:30px;border-radius:20px;margin-bottom:30px;}
-        h1{margin:0;}
+        header{background:#2c3e66;color:white;text-align:center;padding:30px;border-radius:20px;margin-bottom:20px;}
+        h1{margin:0 0 8px;}
+        .warning-box{background:#fff3cd;border-left:5px solid #ffc107;padding:12px 16px;margin:16px 0;border-radius:12px;color:#856404;font-size:14px;}
+        .contact-box{text-align:center;margin:16px 0 8px;color:#2c3e66;font-size:14px;}
         .grid{display:flex;flex-wrap:wrap;gap:30px;}
         .col{flex:1;min-width:320px;}
         section{background:white;border-radius:20px;padding:24px;margin-bottom:30px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
@@ -29,8 +31,16 @@
 <body>
 <header>
     <h1>🎓 大学生 · 家教平台</h1>
-    <p>发布信息时请务必记住【编辑密码】 | 修改/删除信息需输入密码（有问题请联系微信siro940920）</p>
+    <p>发布信息时请务必记住【编辑密码】 | 修改/删除信息需输入密码</p>
 </header>
+
+<div class="contact-box">
+    📧 有问题请联系：yugio92050@qq.com
+</div>
+
+<div class="warning-box">
+    ⚠️ 中介勿扰，任何名义未上课就收取费用的/和家长说能帮忙介绍老师的都可能是骗子，上当受骗本平台不负责，请谨慎辨别。
+</div>
 
 <div class="grid">
     <!-- 左侧大学生 -->
@@ -68,11 +78,9 @@
 </div>
 
 <script>
-    // ---------- 请修改成你的 Supabase 项目配置 ----------
-    const MY_SUPABASE_URL = 'https://ftbfuvwvfeldriwzrfjq.supabase.co';   // 替换成你的
-    const MY_SUPABASE_ANON_KEY = 'sb_publishable_pZb0TC_3QVvRHvmWalsdmg_gVzCVomq'; // 替换成你的
-    // ---------- 不要修改下面代码，只改上面两行 ----------
-
+    // ---------- Supabase 配置 ----------
+    const MY_SUPABASE_URL = 'https://ftbfuvwvfeldriwzrfjq.supabase.co';
+    const MY_SUPABASE_ANON_KEY = 'sb_publishable_pZb0TC_3QVvRHvmWalsdmg_gVzCVomq';
     const sb = window.supabase.createClient(MY_SUPABASE_URL, MY_SUPABASE_ANON_KEY);
 
     function escapeHtml(str) {
@@ -83,7 +91,7 @@
         return Math.random().toString(36).substring(2, 10);
     }
 
-    // 加载家教信息（不再显示密码）
+    // 加载家教信息（不显示密码）
     async function loadTutors() {
         const { data, error } = await sb.from('tutors').select('*').order('created_at', { ascending: false });
         const container = document.getElementById('tutorList');
@@ -110,7 +118,7 @@
         container.innerHTML = html;
     }
 
-    // 加载家长需求（不再显示密码）
+    // 加载家长需求（不显示密码）
     async function loadParents() {
         const { data, error } = await sb.from('parent_requests').select('*').order('created_at', { ascending: false });
         const container = document.getElementById('parentList');
