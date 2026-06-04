@@ -2,73 +2,72 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>发布信息</title>
-
-<!-- Supabase SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<title>发布家教信息</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-
 <body>
 
 <h1>发布家教信息</h1>
-
 <input id="name" placeholder="姓名">
 <input id="subject" placeholder="科目">
 <input id="contact" placeholder="联系方式">
-
 <button onclick="post()">发布</button>
 
 <h2>已发布信息</h2>
 <div id="list"></div>
 
 <script>
-const supabase = supabase.createClient(
-  "https://ircomtgwhaecyxwqheey.supabase.co",
-  "sb_publishable_kcRMEnY_vsWngb9GNU-GiQ_oMcq-jeB"
-);
+  // ✅ 用你正确的项目 URL 和 anon key
+  const SUPABASE_URL = 'https://kcrmenyvswngb9gnu.supabase.co';
+  const SUPABASE_ANON_KEY = '你的正确的anon key';   // 替换这里！！！
 
-async function post() {
-    const name = document.getElementById("name").value;
-    const subject = document.getElementById("subject").value;
-    const contact = document.getElementById("contact").value;
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const { error } = await supabase
-        .from('posts')
-        .insert([
-            {
-                name,
-                subject,
-                contact
-            }
-        ]);
+  async function post() {
+    const name = document.getElementById('name').value;
+    const subject = document.getElementById('subject').value;
+    const contact = document.getElementById('contact').value;
 
-    if (!error) {
-        document.getElementById("name").value = "";
-        document.getElementById("subject").value = "";
-        document.getElementById("contact").value = "";
-        render();
-    } else {
-        console.log(error);
+    if (!name || !subject || !contact) {
+      alert('请填写完整信息');
+      return;
     }
-}
 
-async function render() {
+    const { data, error } = await supabase
+      .from('posts')
+      .insert([{ name, subject, contact }]);
 
-    let { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .order('created_at', { ascending: false });
+    if (error) {
+      console.error('插入失败:', error);
+      alert('发布失败，请看控制台（F12）');
+    } else {
+      // 清空输入框
+      document.getElementById('name').value = '';
+      document.getElementById('subject').value = '';
+      document.getElementById('contact').value = '';
+      render(); // 刷新列表
+    }
+  }
 
-    let html = "";
+  async function render() {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    (data || []).forEach(item => {
-        html += `<p>${item.name}｜${item.subject}｜${item.contact}</p>`;
-    });
+    if (error) {
+      console.error('查询失败:', error);
+      return;
+    }
 
-    document.getElementById("list").innerHTML = html;
-}
+    let html = '';
+    for (let item of data || []) {
+      html += `<p><strong>${item.name}</strong> | ${item.subject} | ${item.contact}</p>`;
+    }
+    document.getElementById('list').innerHTML = html || '<p>暂无信息</p>';
+  }
 
-render();
+  render();
 </script>
 
 </body>
