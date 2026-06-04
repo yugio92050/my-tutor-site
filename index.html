@@ -121,10 +121,10 @@ input, select {
 </section>
 
 <script>
-    // ---------- Supabase 配置（使用你已有的项目）----------
+    // ✅ 使用不同的变量名，避免与全局 supabase 对象冲突
     const SUPABASE_URL = 'https://ftbfuvwvfeldriwzrfjq.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_pZb0TC_3QVvRHvmWalsdmg_gVzCVomq';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ================= 大学生家教部分 =================
     async function publishTutor() {
@@ -143,7 +143,7 @@ input, select {
             return;
         }
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('tutors')
             .insert([{ name, gender, age, school, major, subjects, available_time, expected_salary, contact }]);
 
@@ -166,7 +166,7 @@ input, select {
     }
 
     async function loadTutors() {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('tutors')
             .select('*')
             .order('created_at', { ascending: false });
@@ -174,7 +174,7 @@ input, select {
         const container = document.getElementById('tutorsList');
         if (error) {
             console.error(error);
-            container.innerHTML = '<p>⚠️ 加载失败，请刷新页面</p>';
+            container.innerHTML = '<p>⚠️ 加载失败，请检查网络或数据库配置</p>';
             return;
         }
         if (!data || data.length === 0) {
@@ -211,7 +211,7 @@ input, select {
             return;
         }
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('parent_requests')
             .insert([{ child_grade, subject, district, budget, contact }]);
 
@@ -230,7 +230,7 @@ input, select {
     }
 
     async function loadParentRequests() {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('parent_requests')
             .select('*')
             .order('created_at', { ascending: false });
@@ -238,7 +238,7 @@ input, select {
         const container = document.getElementById('parentRequestsList');
         if (error) {
             console.error(error);
-            container.innerHTML = '<p>⚠️ 加载失败，请刷新页面</p>';
+            container.innerHTML = '<p>⚠️ 加载失败，请检查网络或数据库配置</p>';
             return;
         }
         if (!data || data.length === 0) {
@@ -270,7 +270,7 @@ input, select {
         });
     }
 
-    // 绑定事件（避免 onclick 作用域问题）
+    // 绑定事件
     document.getElementById('publishTutorBtn').addEventListener('click', publishTutor);
     document.getElementById('publishParentBtn').addEventListener('click', publishParentRequest);
 
