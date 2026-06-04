@@ -24,13 +24,12 @@
         .card{background:#fafcff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:16px;position:relative;}
         .card h3{margin:0 0 8px;}
         .card-actions{position:absolute;top:12px;right:12px;}
-        .edit-key-note{font-size:12px;color:#d9534f;margin-top:8px;}
     </style>
 </head>
 <body>
 <header>
     <h1>🎓 大学生 · 家教桥梁</h1>
-    <p>发布信息时请记住【编辑密码】 | 修改/删除需输入密码</p>
+    <p>发布信息时请务必记住【编辑密码】 | 修改/删除需输入密码</p>
 </header>
 
 <div class="grid">
@@ -47,7 +46,7 @@
             <div class="form-group"><label>可授课时间</label><input type="text" id="tutor_time" placeholder="周末全天"></div>
             <div class="form-group"><label>期望薪资</label><input type="text" id="tutor_salary" placeholder="150元/小时"></div>
             <div class="form-group"><label>联系方式</label><input type="text" id="tutor_contact" placeholder="微信号"></div>
-            <div class="form-group"><label>设置编辑密码</label><input type="text" id="tutor_key" placeholder="留空则自动生成"></div>
+            <div class="form-group"><label>设置编辑密码（留空自动生成）</label><input type="text" id="tutor_key" placeholder="可选，留空则自动生成"></div>
             <button class="btn" id="tutorBtn">📢 发布家教信息</button>
         </section>
         <section><h2>📚 所有家教信息</h2><div id="tutorList">加载中...</div></section>
@@ -61,7 +60,7 @@
             <div class="form-group"><label>所在地区</label><input type="text" id="parent_district" placeholder="朝阳区/线上"></div>
             <div class="form-group"><label>预算(元/小时)</label><input type="text" id="parent_budget" placeholder="150"></div>
             <div class="form-group"><label>联系方式</label><input type="text" id="parent_contact" placeholder="微信号"></div>
-            <div class="form-group"><label>设置编辑密码</label><input type="text" id="parent_key" placeholder="留空则自动生成"></div>
+            <div class="form-group"><label>设置编辑密码（留空自动生成）</label><input type="text" id="parent_key" placeholder="可选，留空则自动生成"></div>
             <button class="btn" id="parentBtn">📢 发布需求</button>
         </section>
         <section><h2>📌 所有家长需求</h2><div id="parentList">加载中...</div></section>
@@ -74,7 +73,6 @@
     const MY_SUPABASE_ANON_KEY = 'sb_publishable_pZb0TC_3QVvRHvmWalsdmg_gVzCVomq'; // 替换成你的
     // ---------- 不要修改下面代码，只改上面两行 ----------
 
-    // 使用 window.supabase 确保全局存在
     const sb = window.supabase.createClient(MY_SUPABASE_URL, MY_SUPABASE_ANON_KEY);
 
     function escapeHtml(str) {
@@ -85,7 +83,7 @@
         return Math.random().toString(36).substring(2, 10);
     }
 
-    // 加载家教信息
+    // 加载家教信息（不再显示密码）
     async function loadTutors() {
         const { data, error } = await sb.from('tutors').select('*').order('created_at', { ascending: false });
         const container = document.getElementById('tutorList');
@@ -105,7 +103,6 @@
                     <p>⏰ 时间：${escapeHtml(t.available_time)}</p>
                     <p>💰 薪资：${escapeHtml(t.expected_salary)}</p>
                     <p>📞 ${escapeHtml(t.contact)}</p>
-                    <div class="edit-key-note">🔑 编辑密码：${escapeHtml(t.edit_key)}</div>
                     <small>${new Date(t.created_at).toLocaleString()}</small>
                 </div>
             `;
@@ -113,7 +110,7 @@
         container.innerHTML = html;
     }
 
-    // 加载家长需求
+    // 加载家长需求（不再显示密码）
     async function loadParents() {
         const { data, error } = await sb.from('parent_requests').select('*').order('created_at', { ascending: false });
         const container = document.getElementById('parentList');
@@ -130,7 +127,6 @@
                     <h3>📖 ${escapeHtml(r.child_grade)} · ${escapeHtml(r.subject)}</h3>
                     <p>📍 ${escapeHtml(r.district)} | 💰 ${escapeHtml(r.budget)}元/小时</p>
                     <p>📞 ${escapeHtml(r.contact)}</p>
-                    <div class="edit-key-note">🔑 编辑密码：${escapeHtml(r.edit_key)}</div>
                     <small>${new Date(r.created_at).toLocaleString()}</small>
                 </div>
             `;
@@ -158,7 +154,7 @@
         const { error } = await sb.from('tutors').insert([{ name, gender, age, school, major, subjects, available_time, expected_salary, contact, edit_key }]);
         if (error) { alert('发布失败: ' + error.message); console.error(error); }
         else {
-            alert(`✅ 发布成功！请记住编辑密码：${edit_key}`);
+            alert(`✅ 发布成功！请务必记住编辑密码：${edit_key}\n（建议截图保存，以后修改/删除时需要输入）`);
             document.getElementById('tutor_name').value = '';
             document.getElementById('tutor_gender').value = '';
             document.getElementById('tutor_age').value = '';
@@ -189,7 +185,7 @@
         const { error } = await sb.from('parent_requests').insert([{ child_grade, subject, district, budget, contact, edit_key }]);
         if (error) { alert('发布失败: ' + error.message); }
         else {
-            alert(`✅ 需求发布成功！请记住编辑密码：${edit_key}`);
+            alert(`✅ 需求发布成功！请务必记住编辑密码：${edit_key}\n（建议截图保存，以后修改/删除时需要输入）`);
             document.getElementById('parent_grade').value = '';
             document.getElementById('parent_subject').value = '';
             document.getElementById('parent_district').value = '';
@@ -200,7 +196,7 @@
         }
     }
 
-    // 编辑/删除（挂载到 window 供 onclick 调用）
+    // 编辑/删除函数（需要密码验证）
     window.editTutor = async function(id) {
         const key = prompt('请输入该帖子的编辑密码：');
         if (!key) return;
@@ -267,11 +263,9 @@
         else { alert('删除成功'); loadParents(); }
     };
 
-    // 绑定发布按钮
     document.getElementById('tutorBtn').onclick = publishTutor;
     document.getElementById('parentBtn').onclick = publishParent;
 
-    // 初始化加载
     loadTutors();
     loadParents();
 </script>
